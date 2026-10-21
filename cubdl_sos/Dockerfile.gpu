@@ -1,0 +1,9 @@
+# CUBDL speed-of-sound comparison (NVIDIA GPU, CUDA 12 wheels; needs the NVIDIA driver and --gpus all).
+#   docker build -f Dockerfile.gpu -t cubdl-sos-gpu .
+#   docker run --rm --gpus all -v /path/to/cubdl:/data:ro -v "$PWD/results":/work/results cubdl-sos-gpu --data /data
+FROM python:3.11-slim
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 XLA_PYTHON_CLIENT_PREALLOCATE=false
+WORKDIR /work
+RUN pip install "jax[cuda12]==0.10.2" numpy==2.4.6 scipy==1.17.1 h5py hdf5plugin matplotlib==3.11.2
+COPY *.py /tool/
+ENTRYPOINT ["python", "/tool/run_sos_comparison.py"]

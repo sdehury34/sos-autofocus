@@ -1,0 +1,1 @@
+Put the 62 Waterloo calf .hdf5 files here (see README, section 4.2).

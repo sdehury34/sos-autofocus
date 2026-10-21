@@ -1,0 +1,2 @@
+Put the CUBDL plane-wave files (.hdf5 or .h5, for example EUT001.hdf5) in this folder.
+The tool reads every .hdf5 / .h5 file here. Git ignores these files (CUBDL license).

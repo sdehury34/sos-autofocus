@@ -1,0 +1,8 @@
+# CPU versions (verified 2026-10-13). For an NVIDIA GPU, replace jax[cpu] with jax[cuda12].
+jax[cpu]==0.10.2
+jaxlib==0.10.2
+numpy==2.4.6
+scipy==1.17.1
+h5py
+hdf5plugin
+matplotlib==3.11.2

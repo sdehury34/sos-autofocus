@@ -1,0 +1,14 @@
+__pycache__/
+*.hdf5
+*.h5
+cubdl_sos/results/
+cubdl_sos/test/
+cubdl_sos/check_*.png
+demo/out/
+figures/*.pdf
+figures/*.png
+figures/table_main.tex
+figures/numbers.txt
+figures/cubdl_wires.*
+figures/check/
+.ipynb_checkpoints/
