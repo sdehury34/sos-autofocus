@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speed-of-Sound Autofocus Demo</title>
+<style>
+:root {
+  --bg: #f6f7f9; --card: #ffffff; --ink: #1b1f24; --muted: #5d6673; --line: #dde1e6;
+  --conv: #6b7280; --cons: #d62728; --true: #1b1f24; --c0: #2f6fb5; --accent: #d62728;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111418; --card: #1a1e24; --ink: #e8eaed; --muted: #9aa3ad; --line: #2c323a;
+    --conv: #9ca3af; --cons: #ff5a52; --true: #e8eaed; --c0: #6aa6ef; --accent: #ff5a52;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 40px; }
+h1 { font-size: 26px; line-height: 1.25; margin: 0 0 8px; }
+h2 { font-size: 16px; margin: 0 0 12px; }
+p { margin: 0 0 10px; }
+.lead { color: var(--muted); max-width: 820px; }
+.models { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 22px; }
+.chip { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: 13.5px; }
+.chip b { font-weight: 600; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+.grid { display: grid; grid-template-columns: 330px 1fr; gap: 18px; }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.stack { display: grid; gap: 18px; align-content: start; }
+.step { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.speed { font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.speed small { font-size: 16px; font-weight: 500; color: var(--muted); }
+input[type=range] { width: 100%; margin: 14px 0 4px; accent-color: var(--accent); height: 28px; }
+.ticks { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.presets button { font: inherit; font-size: 13px; padding: 8px 4px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--ink); cursor: pointer; }
+.presets button:hover, .presets button.on { border-color: var(--accent); }
+.presets button span { display: block; color: var(--muted); font-size: 12px; }
+.res { display: grid; gap: 10px; }
+.stat { border-radius: 12px; padding: 12px 14px; border: 1px solid var(--line); border-left: 5px solid var(--c); }
+.stat .name { font-size: 13px; color: var(--muted); }
+.stat .val { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat .err { font-size: 14px; font-variant-numeric: tabular-nums; }
+.verdict { font-size: 14px; margin-top: 4px; }
+svg { width: 100%; height: auto; display: block; }
+svg text { fill: var(--muted); font-size: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); margin-top: 6px; }
+.legend i { display: inline-block; width: 22px; height: 0; border-top: 2.5px solid; vertical-align: middle; margin-right: 6px; }
+.imgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.imgs figure { margin: 0; }
+.imgs img { width: 100%; aspect-ratio: 38 / 45; display: block; border-radius: 6px; background: #000; }
+.imgs figcaption { font-size: 13px; text-align: center; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+.note { font-size: 13px; color: var(--muted); margin-top: 10px; }
+.explain { margin-top: 18px; }
+.explain ul { margin: 0; padding-left: 20px; }
+.explain li { margin-bottom: 6px; }
+footer { margin-top: 22px; font-size: 13px; color: var(--muted); }
+a { color: var(--c0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Speed-of-sound autofocus: does the delay model matter?</h1>
+  <p class="lead">A scanner fires steered plane waves with delays computed for <b>1540 m/s</b>. This demo simulates
+    a medium with a speed of sound <b>you choose</b>, then estimates that speed back from the echoes with two
+    delay models.</p>
+  <div class="models">
+    <div class="chip"><span class="dot" style="background:var(--conv)"></span><b>Conventional</b>: keeps the steering angle fixed (p = sin&theta; / c)</div>
+    <div class="chip"><span class="dot" style="background:var(--cons)"></span><b>Transmit-delay-consistent</b>: keeps the slowness of the firing delays (p = sin&theta; / c<sub>0</sub>)</div>
+  </div>
+
+  <div class="grid">
+    <div class="stack">
+      <div class="card">
+        <div class="step">1 · Choose the true speed</div>
+        <div class="speed"><span id="cv">1620</span> <small>m/s</small></div>
+        <input id="slider" type="range" min="1440" max="1660" step="10" value="1620" aria-label="True speed of sound (m/s)">
+        <div class="ticks"><span>1440</span><span>1540 (scanner)</span><span>1660</span></div>
+        <div class="presets">
+          <button data-c="1460">Fat<span>1460 m/s</span></button>
+          <button data-c="1580">Muscle<span>1580 m/s</span></button>
+          <button data-c="1640">Fast<span>1640 m/s</span></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="step">2 · Compare the estimates</div>
+        <div class="res">
+          <div class="stat" style="--c:var(--conv)"><div class="name">Conventional</div>
+            <div class="val"><span id="e_conv"></span> <small>m/s</small></div><div class="err" id="d_conv"></div></div>
+          <div class="stat" style="--c:var(--cons)"><div class="name">Transmit-delay-consistent</div>
+            <div class="val"><span id="e_cons"></span> <small>m/s</small></div><div class="err" id="d_cons"></div></div>
+        </div>
+        <p class="verdict" id="verdict"></p>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <h2>Focus curve: each estimate is the peak of its curve</h2>
+        <svg id="chart" viewBox="0 0 680 330" role="img" aria-label="Coherence factor against trial speed"></svg>
+        <div class="legend">
+          <span><i style="border-color:var(--conv)"></i>Conventional</span>
+          <span><i style="border-color:var(--cons)"></i>Transmit-delay-consistent</span>
+          <span><i style="border-color:var(--true);border-top-style:dotted"></i>True speed</span>
+          <span><i style="border-color:var(--c0);border-top-style:dashed"></i>Scanner speed 1540 m/s</span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>B-mode images of the same medium (50 dB, depth 5–50 mm)</h2>
+        <div class="imgs">
+          <figure><figcaption>At 1540 m/s (scanner)</figcaption><img id="i0" alt="Image at 1540 m/s"></figure>
+          <figure><figcaption id="c1"></figcaption><img id="i1" alt="Image at the conventional estimate"></figure>
+          <figure><figcaption id="c2"></figcaption><img id="i2" alt="Image at the consistent estimate"></figure>
+        </div>
+        <p class="note">In this noise-free simulation, the point targets become sharp at the right speed. In real tissue
+          the difference is much harder to see, but the estimated speed, the biomarker, still changes.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card explain">
+    <h2>What am I seeing?</h2>
+    <ul>
+      <li><b>Focus curve.</b> For each trial speed, the echoes are beamformed and the <i>coherence factor</i> (how well
+        the echoes of all 128 elements line up) is measured. The estimate is the speed with the highest value.</li>
+      <li><b>Try it.</b> Move the true speed far from 1540 m/s. The conventional estimate stays closer to 1540 m/s;
+        the consistent estimate follows the true speed. Near 1540 m/s both models are the same.</li>
+      <li><b>Data.</b> Simulated 128-element linear array, 5 MHz, 31 plane waves (±15°), speckle with a cyst and four
+        point targets. All results were computed with the code of the paper and stored in this page.</li>
+      <li><b>In vivo.</b> On 62 calf scans with a through-transmission reference, the consistent model decreases the
+        error from 27.6 to 12.5 m/s.</li>
+    </ul>
+  </div>
+  <footer>Code: <a href="https://github.com/sdehury34/sos-autofocus">github.com/sdehury34/sos-autofocus</a></footer>
+</div>
+
+<script>
+const DATA = /*DATA*/null;
+const $ = id => document.getElementById(id);
+const W = 680, H = 330, M = {l: 52, r: 14, t: 14, b: 42}, X0 = 1420, X1 = 1720;
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const sx = c => M.l + (c - X0) / (X1 - X0) * (W - M.l - M.r);
+const fmt = d => (d > 0 ? "+" : d < 0 ? "−" : "±") + Math.abs(d).toFixed(0) + " m/s";
+
+function chart(d, cTrue) {
+  const ymin = Math.max(0, Math.floor(Math.min(...d.angle.cf, ...d.delays.cf) * 10) / 10);
+  const sy = v => M.t + (1 - (v - ymin) / (1 - ymin)) * (H - M.t - M.b);
+  let s = "";
+  for (let c = 1450; c <= 1700; c += 50)
+    s += `<line x1="${sx(c)}" x2="${sx(c)}" y1="${M.t}" y2="${H - M.b}" stroke="${css("--line")}"/>` +
+         `<text x="${sx(c)}" y="${H - M.b + 18}" text-anchor="middle">${c}</text>`;
+  for (let v = Math.ceil(ymin * 10) / 10; v <= 1.0001; v += 0.1)
+    s += `<line x1="${M.l}" x2="${W - M.r}" y1="${sy(v)}" y2="${sy(v)}" stroke="${css("--line")}"/>` +
+         `<text x="${M.l - 8}" y="${sy(v) + 4}" text-anchor="end">${v.toFixed(1)}</text>`;
+  s += `<text x="${(M.l + W - M.r) / 2}" y="${H - 4}" text-anchor="middle">trial speed of sound (m/s)</text>`;
+  s += `<text transform="translate(13 ${(M.t + H - M.b) / 2}) rotate(-90)" text-anchor="middle">coherence factor</text>`;
+  s += `<line x1="${sx(1540)}" x2="${sx(1540)}" y1="${M.t}" y2="${H - M.b}" stroke="${css("--c0")}" stroke-width="1.5" stroke-dasharray="6 4"/>`;
+  s += `<line x1="${sx(cTrue)}" x2="${sx(cTrue)}" y1="${M.t}" y2="${H - M.b}" stroke="${css("--true")}" stroke-width="2" stroke-dasharray="2 4"/>`;
+  for (const [k, col] of [["angle", "--conv"], ["delays", "--cons"]]) {
+    const pts = d[k].c.map((c, i) => `${sx(c).toFixed(1)},${sy(d[k].cf[i]).toFixed(1)}`).join(" ");
+    s += `<polyline points="${pts}" fill="none" stroke="${css(col)}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    s += `<circle cx="${sx(d[k].est)}" cy="${sy(1)}" r="6.5" fill="${css(col)}" stroke="${css("--card")}" stroke-width="2"/>`;
+  }
+  $("chart").innerHTML = s;
+}
+
+function show(c) {
+  const d = DATA[String(c)];
+  $("slider").value = c; $("cv").textContent = c;
+  const ea = d.angle.est, ed = d.delays.est;
+  $("e_conv").textContent = ea.toFixed(0); $("d_conv").textContent = "error " + fmt(ea - c);
+  $("e_cons").textContent = ed.toFixed(0); $("d_cons").textContent = "error " + fmt(ed - c);
+  const a = Math.abs(ea - c), b = Math.abs(ed - c);
+  $("verdict").textContent = Math.abs(c - 1540) < 15
+    ? "The true speed is close to 1540 m/s, where both models are the same. Move the slider further away."
+    : b < a ? `The conventional estimate is pulled ${a.toFixed(0)} m/s toward 1540 m/s; the consistent estimate is within ${b.toFixed(0)} m/s.`
+            : "Both models give a similar error here.";
+  chart(d, c);
+  d.img.forEach((src, i) => $("i" + i).src = src);
+  $("c1").textContent = `Conventional: ${ea.toFixed(0)} m/s`;
+  $("c2").textContent = `Consistent: ${ed.toFixed(0)} m/s`;
+  document.querySelectorAll(".presets button").forEach(bt => bt.classList.toggle("on", +bt.dataset.c === c));
+}
+
+$("slider").addEventListener("input", e => show(+e.target.value));
+document.querySelectorAll(".presets button").forEach(bt => bt.addEventListener("click", () => show(+bt.dataset.c)));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => show(+$("slider").value));
+show(1620);
+</script>
+</body>
+</html>

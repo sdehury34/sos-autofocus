@@ -10,27 +10,23 @@ wave is $\sin\theta/c_0$. Common beamformers use $\sin\theta/c$ instead. On 62 i
 acquisitions (OpenH-RF), using the consistent slowness decreases the autofocus error from 27.6 to
 12.5 m/s.
 
-## Demo (no download)
+## Demo (no download, no install)
 
-Interactive app in the browser: pick a speed of sound, press **Run**, compare the two models.
+**[Open the interactive demo](https://sdehury34.github.io/sos-autofocus/)** (or open `docs/index.html`
+in any browser). Pick a speed of sound with the slider and compare the two delay models: the
+conventional estimate is pulled toward 1540 m/s, the consistent one finds the true speed.
 
-```bash
-pip install -r cubdl_sos/requirements.txt gradio
-python demo/app.py
-```
+![Interactive demo](docs/screenshot.png)
 
-![Interactive demo](demo/app_screenshot.png)
-
-Or the same comparison as a script (`python demo/demo.py`) or in Colab (badge above).
-
-The demo simulates media with known speeds: the conventional estimates are pulled toward 1540 m/s,
-the consistent model finds the true speed.
+The page stores results computed with the code of this repository (`python demo/make_page.py`
+makes it again). The same comparison runs live with `python demo/demo.py` or in Colab (badge above).
 
 ## Contents
 
 | Path | Content |
 |---|---|
-| `demo/` | Interactive app, demo script and Colab notebook |
+| `docs/` | Interactive demo page |
+| `demo/` | Demo script, Colab notebook, and the script that makes the demo page |
 | `cubdl_sos/` | Beamformer (JAX), loaders, estimation, simulator, data download, Dockerfiles ([guide](cubdl_sos/README.md)) |
 | `figures/` | Scripts for Table 1 and Figs. 1-3 |
 | `data/openh_rf/results_*` | Calf results used in the paper |
