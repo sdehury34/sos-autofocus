@@ -30,20 +30,20 @@ C0 = 1540.0
 MODELS = {"angle": r"conventional, $p=\sin\theta/c$", "delays": r"consistent, $p=\sin\theta/c_0$"}
 
 
-def simulate(c_true, out_dir):
+def simulate(c_true, out_dir, angles=31, max_angle=15.0):
     """Simulated channel data (CUBDL layout) with true speed c_true and firing delays computed with c0."""
-    path = Path(out_dir) / f"SYN{c_true:.0f}.hdf5"
+    path = Path(out_dir) / f"SYN{c_true:.0f}_{angles}x{max_angle:.0f}.hdf5"
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run([sys.executable, str(ROOT / "cubdl_sos" / "make_synthetic.py"), "--out", str(path),
-                        "--c", str(c_true), "--angles", "31", "--max-angle", "15", "--slowness", "delays"],
+                        "--c", str(c_true), "--angles", str(angles), "--max-angle", str(max_angle), "--slowness", "delays"],
                        check=True, stdout=subprocess.DEVNULL)
     return path
 
 
-def beamformer(path, slowness):
+def beamformer(path, slowness, nx=96, nz=120, zlim=(10e-3, 45e-3)):
     d = cubdl_io.load(path)
-    xs = np.linspace(d.xe.min(), d.xe.max(), 96); zs = np.linspace(10e-3, 45e-3, 120)
+    xs = np.linspace(d.xe.min(), d.xe.max(), nx); zs = np.linspace(*zlim, nz)
     bf = Beamformer(d, xs, zs, 1.0, chunk=4096, slowness=slowness)
     bf.set_geometry(angles=d.angles, t0_sign=1.0, t_off=0.0, tx_ref="origin")    # convention of the simulator
     return bf

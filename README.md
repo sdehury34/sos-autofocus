@@ -12,21 +12,25 @@ acquisitions (OpenH-RF), using the consistent slowness decreases the autofocus e
 
 ## Demo (no download)
 
+Interactive app in the browser: pick a speed of sound, press **Run**, compare the two models.
+
 ```bash
-pip install -r cubdl_sos/requirements.txt
-python demo/demo.py
+pip install -r cubdl_sos/requirements.txt gradio
+python demo/app.py
 ```
 
-Simulated media with known speeds: the conventional estimates are pulled toward 1540 m/s, the
-consistent model finds the true speed (about 3-5 min on a CPU).
+![Interactive demo](demo/app_screenshot.png)
 
-![Demo result](demo/demo_result.png)
+Or the same comparison as a script (`python demo/demo.py`) or in Colab (badge above).
+
+The demo simulates media with known speeds: the conventional estimates are pulled toward 1540 m/s,
+the consistent model finds the true speed.
 
 ## Contents
 
 | Path | Content |
 |---|---|
-| `demo/` | Demo script and Colab notebook |
+| `demo/` | Interactive app, demo script and Colab notebook |
 | `cubdl_sos/` | Beamformer (JAX), loaders, estimation, simulator, data download, Dockerfiles ([guide](cubdl_sos/README.md)) |
 | `figures/` | Scripts for Table 1 and Figs. 1-3 |
 | `data/openh_rf/results_*` | Calf results used in the paper |
