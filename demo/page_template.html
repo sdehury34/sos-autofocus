@@ -18,17 +18,19 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink);
   font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 40px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 22px 16px 40px; }
 h1 { font-size: 26px; line-height: 1.25; margin: 0 0 8px; }
 h2 { font-size: 16px; margin: 0 0 12px; }
 p { margin: 0 0 10px; }
 .lead { color: var(--muted); max-width: 820px; }
-.models { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 22px; }
+.models { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0 18px; }
 .chip { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: 13.5px; }
 .chip b { font-weight: 600; }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
-.grid { display: grid; grid-template-columns: 330px 1fr; gap: 18px; }
-@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+.controls { display: grid; grid-template-columns: 1fr 1.25fr; gap: 28px; margin-bottom: 18px; }
+.controls .res { grid-template-columns: 1fr 1fr; }
+.grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: start; }
+@media (max-width: 900px) { .grid, .controls, .controls .res { grid-template-columns: 1fr; } }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
 .stack { display: grid; gap: 18px; align-content: start; }
 .step { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
@@ -51,10 +53,10 @@ svg { width: 100%; height: auto; display: block; }
 svg text { fill: var(--muted); font-size: 12px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); margin-top: 6px; }
 .legend i { display: inline-block; width: 22px; height: 0; border-top: 2.5px solid; vertical-align: middle; margin-right: 6px; }
-.imgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.imgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .imgs figure { margin: 0; }
 .imgs img { width: 100%; aspect-ratio: 38 / 45; display: block; border-radius: 6px; background: #000; }
-.imgs figcaption { font-size: 13px; text-align: center; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+.imgs figcaption { font-size: 12.5px; text-align: center; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
 .note { font-size: 13px; color: var(--muted); margin-top: 10px; }
 .explain { margin-top: 18px; }
 .explain ul { margin: 0; padding-left: 20px; }
@@ -74,52 +76,50 @@ a { color: var(--c0); }
     <div class="chip"><span class="dot" style="background:var(--cons)"></span><b>Transmit-delay-consistent</b>: keeps the slowness of the firing delays (p = sin&theta; / c<sub>0</sub>)</div>
   </div>
 
-  <div class="grid">
-    <div class="stack">
-      <div class="card">
-        <div class="step">1 · Choose the true speed</div>
-        <div class="speed"><span id="cv">1620</span> <small>m/s</small></div>
-        <input id="slider" type="range" min="1440" max="1660" step="10" value="1620" aria-label="True speed of sound (m/s)">
-        <div class="ticks"><span>1440</span><span>1540 (scanner)</span><span>1660</span></div>
-        <div class="presets">
-          <button data-c="1460">Fat<span>1460 m/s</span></button>
-          <button data-c="1580">Muscle<span>1580 m/s</span></button>
-          <button data-c="1640">Fast<span>1640 m/s</span></button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="step">2 · Compare the estimates</div>
-        <div class="res">
-          <div class="stat" style="--c:var(--conv)"><div class="name">Conventional</div>
-            <div class="val"><span id="e_conv"></span> <small>m/s</small></div><div class="err" id="d_conv"></div></div>
-          <div class="stat" style="--c:var(--cons)"><div class="name">Transmit-delay-consistent</div>
-            <div class="val"><span id="e_cons"></span> <small>m/s</small></div><div class="err" id="d_cons"></div></div>
-        </div>
-        <p class="verdict" id="verdict"></p>
+  <div class="card controls">
+    <div>
+      <div class="step">1 · Choose the true speed</div>
+      <div class="speed"><span id="cv">1620</span> <small>m/s</small></div>
+      <input id="slider" type="range" min="1440" max="1660" step="10" value="1620" aria-label="True speed of sound (m/s)">
+      <div class="ticks"><span>1440</span><span>1540 (scanner)</span><span>1660</span></div>
+      <div class="presets">
+        <button data-c="1460">Fat<span>1460 m/s</span></button>
+        <button data-c="1580">Muscle<span>1580 m/s</span></button>
+        <button data-c="1640">Fast<span>1640 m/s</span></button>
       </div>
     </div>
+    <div>
+      <div class="step">2 · Compare the estimates</div>
+      <div class="res">
+        <div class="stat" style="--c:var(--conv)"><div class="name">Conventional</div>
+          <div class="val"><span id="e_conv"></span> <small>m/s</small></div><div class="err" id="d_conv"></div></div>
+        <div class="stat" style="--c:var(--cons)"><div class="name">Transmit-delay-consistent</div>
+          <div class="val"><span id="e_cons"></span> <small>m/s</small></div><div class="err" id="d_cons"></div></div>
+      </div>
+      <p class="verdict" id="verdict"></p>
+    </div>
+  </div>
 
-    <div class="stack">
-      <div class="card">
-        <h2>Focus curve: each estimate is the peak of its curve</h2>
-        <svg id="chart" viewBox="0 0 680 330" role="img" aria-label="Coherence factor against trial speed"></svg>
-        <div class="legend">
-          <span><i style="border-color:var(--conv)"></i>Conventional</span>
-          <span><i style="border-color:var(--cons)"></i>Transmit-delay-consistent</span>
-          <span><i style="border-color:var(--true);border-top-style:dotted"></i>True speed</span>
-          <span><i style="border-color:var(--c0);border-top-style:dashed"></i>Scanner speed 1540 m/s</span>
-        </div>
+  <div class="grid">
+    <div class="card">
+      <h2>Focus curve: each estimate is the peak of its curve</h2>
+      <svg id="chart" viewBox="0 0 680 330" role="img" aria-label="Coherence factor against trial speed"></svg>
+      <div class="legend">
+        <span><i style="border-color:var(--conv)"></i>Conventional</span>
+        <span><i style="border-color:var(--cons)"></i>Transmit-delay-consistent</span>
+        <span><i style="border-color:var(--true);border-top-style:dotted"></i>True speed</span>
+        <span><i style="border-color:var(--c0);border-top-style:dashed"></i>Scanner speed 1540 m/s</span>
       </div>
-      <div class="card">
-        <h2>B-mode images of the same medium (50 dB, depth 5–50 mm)</h2>
-        <div class="imgs">
-          <figure><figcaption>At 1540 m/s (scanner)</figcaption><img id="i0" alt="Image at 1540 m/s"></figure>
-          <figure><figcaption id="c1"></figcaption><img id="i1" alt="Image at the conventional estimate"></figure>
-          <figure><figcaption id="c2"></figcaption><img id="i2" alt="Image at the consistent estimate"></figure>
-        </div>
-        <p class="note">In this noise-free simulation, the point targets become sharp at the right speed. In real tissue
-          the difference is much harder to see, but the estimated speed, the biomarker, still changes.</p>
+    </div>
+    <div class="card">
+      <h2>B-mode images (50 dB, depth 5–50 mm)</h2>
+      <div class="imgs">
+        <figure><figcaption>1540 m/s (scanner)</figcaption><img id="i0" alt="Image at 1540 m/s"></figure>
+        <figure><figcaption id="c1"></figcaption><img id="i1" alt="Image at the conventional estimate"></figure>
+        <figure><figcaption id="c2"></figcaption><img id="i2" alt="Image at the consistent estimate"></figure>
       </div>
+      <p class="note">In this noise-free simulation, the point targets become sharp at the right speed. In real tissue
+        the difference is much harder to see, but the estimated speed, the biomarker, still changes.</p>
     </div>
   </div>
 
