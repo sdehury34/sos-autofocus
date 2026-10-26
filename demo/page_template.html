@@ -61,7 +61,20 @@ svg text { fill: var(--muted); font-size: 12px; }
 .explain { margin-top: 18px; }
 .explain ul { margin: 0; padding-left: 20px; }
 .explain li { margin-bottom: 6px; }
-footer { margin-top: 22px; font-size: 13px; color: var(--muted); }
+.wave .wc { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 28px; }
+@media (max-width: 700px) { .wave .wc { grid-template-columns: 1fr; } }
+.wave label { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--muted); }
+.wave label output { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+.wave input[type=range] { margin: 4px 0 8px; }
+.wave .chk { justify-content: flex-start; gap: 8px; align-items: center; margin-bottom: 6px; }
+.wave .res { grid-template-columns: repeat(3, 1fr); margin-top: 10px; }
+@media (max-width: 700px) { .wave .res { grid-template-columns: 1fr; } }
+footer { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  font-size: 13.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+.gh { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 10px; text-decoration: none;
+  background: var(--ink); color: var(--bg); font-weight: 600; }
+.gh:hover { opacity: .88; }
+.gh svg { width: 18px; height: 18px; fill: currentColor; }
 a { color: var(--c0); }
 </style>
 </head>
@@ -123,6 +136,35 @@ a { color: var(--c0); }
     </div>
   </div>
 
+  <div class="card explain wave">
+    <h2>Why the two models differ: the tilt of the wave inside the tissue</h2>
+    <p class="note" style="margin:0 0 12px">The scanner tilts each plane wave by firing the elements one after another,
+      with gaps computed at 1540 m/s. Those gaps fix how fast the wave front sweeps along the probe (sin&theta; / 1540).
+      If the tissue is faster or slower, the wave bends to a different angle, like light entering water. The
+      conventional model ignores this and keeps the angle &theta;.</p>
+    <div class="wc">
+      <div><label for="w_c">Speed in the tissue <output id="wo_c">1600 m/s</output></label>
+        <input id="w_c" type="range" min="1440" max="1660" step="10" value="1600"></div>
+      <div><label for="w_th">Steering angle &theta; <output id="wo_th">15&deg;</output></label>
+        <input id="w_th" type="range" min="0" max="20" step="1" value="15"></div>
+    </div>
+    <label class="chk"><input id="w_mag" type="checkbox" checked> Draw the angle difference 10 times larger so it can be seen</label>
+    <svg id="wave" style="max-width:760px;margin:0 auto" viewBox="0 0 700 330" role="img" aria-label="Wave fronts under the two delay models"></svg>
+    <div class="legend">
+      <span><i style="border-color:var(--cons)"></i>Real wave front (consistent model)</span>
+      <span><i style="border-color:var(--conv);border-top-style:dashed"></i>Where the conventional model puts it</span>
+      <span><i style="border-color:var(--c0)"></i>Firing delays across the probe</span>
+    </div>
+    <div class="res">
+      <div class="stat" style="--c:var(--cons)"><div class="name">Real travel angle</div><div class="val" id="w_phi"></div></div>
+      <div class="stat" style="--c:var(--conv)"><div class="name">Angle the conventional model assumes</div><div class="val" id="w_tha"></div></div>
+      <div class="stat" style="--c:var(--ink)"><div class="name">Transmit-time error at 45 mm, probe edge</div><div class="val" id="w_dt"></div></div>
+    </div>
+    <p class="note">One period of the 5 MHz pulse lasts 200 ns, so an error of 100&ndash;200 ns is enough to make the echoes
+      of the tilted waves disagree. The error is zero only at 1540 m/s, which is why the conventional estimate is pulled
+      toward 1540 m/s.</p>
+  </div>
+
   <div class="card explain">
     <h2>What am I seeing?</h2>
     <ul>
@@ -136,7 +178,10 @@ a { color: var(--c0); }
         error from 27.6 to 12.5 m/s.</li>
     </ul>
   </div>
-  <footer>Code: <a href="https://github.com/sdehury34/sos-autofocus">github.com/sdehury34/sos-autofocus</a></footer>
+  <footer>
+    <span>Code, data list and scripts to reproduce the paper</span>
+    <a class="gh" href="https://github.com/sdehury34/sos-autofocus"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub</a>
+  </footer>
 </div>
 
 <script>
@@ -191,6 +236,41 @@ $("slider").addEventListener("input", e => show(+e.target.value));
 document.querySelectorAll(".presets button").forEach(bt => bt.addEventListener("click", () => show(+bt.dataset.c)));
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => show(+$("slider").value));
 show(1620);
+function wave() {
+  const c = +$("w_c").value, thd = +$("w_th").value, c0 = 1540, th = thd * Math.PI / 180;
+  $("wo_c").value = c + " m/s"; $("wo_th").value = thd + "\u00b0";
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const p = Math.sin(th) / c0, phi = Math.asin(Math.min(0.999, c * p));
+  const W = 700, H = 330, a0 = -19e-3, a1 = 19e-3, zMax = 50e-3, top = 70, L = 60, R = 30;
+  const sx = x => L + (x - a0) / (a1 - a0) * (W - L - R), sz = z => top + z / zMax * (H - top - 20);
+  let s = `<defs><clipPath id="wmed"><rect x="${sx(a0)}" y="${top}" width="${sx(a1) - sx(a0)}" height="${sz(zMax) - top}"/></clipPath></defs>`;
+  s += `<rect x="${sx(a0)}" y="${top}" width="${sx(a1) - sx(a0)}" height="${sz(zMax) - top}" fill="${css("--bg")}"/>`;
+  const full = (a1 - a0) * Math.sin(20 * Math.PI / 180) / c0;
+  for (let i = 0; i < 32; i++) {
+    const x = a0 + (i + 0.5) / 32 * (a1 - a0), hg = (x - a0) * Math.sin(th) / c0 / full * 38;
+    s += `<rect x="${sx(x) - 3}" y="${top - 8 - hg}" width="6" height="${hg}" fill="${css("--c0")}"/>`;
+  }
+  s += `<rect x="${sx(a0)}" y="${top - 7}" width="${sx(a1) - sx(a0)}" height="7" fill="${css("--ink")}"/>`;
+  s += `<text x="${sx(a0)}" y="14">firing delays (bars)</text><text x="${sx(a1)}" y="${sz(zMax) - 8}" text-anchor="end">depth 50 mm</text>`;
+  const mag = $("w_mag").checked ? 10 : 1, phiD = th + mag * (phi - th);
+  for (const [ang, col, dash] of [[th, css("--conv"), "6 5"], [phiD, css("--cons"), ""]])
+    for (let k = 1; k <= 4; k++) {
+      const r = k * 12e-3, pts = [];
+      for (let j = 0; j <= 40; j++) { const x = a0 + j / 40 * (a1 - a0); pts.push(`${sx(x)},${sz((r - (x - a0) * Math.sin(ang)) / Math.cos(ang))}`); }
+      s += `<polyline points="${pts.join(" ")}" fill="none" stroke="${col}" stroke-width="2" ${dash ? `stroke-dasharray="${dash}"` : ""} clip-path="url(#wmed)"/>`;
+    }
+  $("wave").innerHTML = s;
+  const x = a1, z = 45e-3;
+  const tTrue = p * (x - a0) + z * Math.sqrt(Math.max(1 / (c * c) - p * p, 0));
+  const tConv = ((x - a0) * Math.sin(th) + z * Math.cos(th)) / c;
+  $("w_phi").textContent = (phi * 180 / Math.PI).toFixed(2) + "\u00b0";
+  $("w_tha").textContent = thd.toFixed(2) + "\u00b0";
+  $("w_dt").textContent = ((tConv - tTrue) * 1e9).toFixed(0) + " ns";
+}
+["w_c", "w_th"].forEach(id => $(id).addEventListener("input", wave));
+$("w_mag").addEventListener("change", wave);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", wave);
+wave();
 </script>
 </body>
 </html>
